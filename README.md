@@ -22,23 +22,18 @@ and type 'chmod +x ./csgosb' to give run access.
 # Faq:
 
 Q: How to fix "Failed to connect the match."?
-
 A: Restart CS:GO and set your max ping to 350ms.
 
 Q: I'm in a lobby and stuck at "Confirming match..."
-
 A: Make sure the lobby leader has blocked the same servers.
 
 Q: Why does this script need root access?
-
 A: iptables won't work without root access. This script won't edit other files.
 
 Q: Why can't I see server's ping after unblocking it?
-
 A: You've probably blocked it multiple times. Try to unblock it again.
 
 Q: Am I allowed to modify and publish my version of this script?
-
 A: Yes, but please tell me about it so I can fix my version of the script.
 
 If you find bugs or missing servers from this script, please report them to me.

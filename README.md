@@ -38,6 +38,7 @@ A: You've probably blocked it multiple times. Try to unblock it again.
 Q: Am I allowed to modify and publish my version of this script?<br>
 A: Yes, but please tell me about it so I can fix my version of the script.
 
-If you find bugs or missing servers from this script, please report them to me.
+This is not the finest code you have seen, but atleast it does it's job.
+Give me suggestions and if you find bugs or missing servers from this script, please report them to me.
 
 -santeri3700 aka LuomuBanaani

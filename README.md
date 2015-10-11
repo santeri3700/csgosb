@@ -1,3 +1,5 @@
+# CS:GO Server Blocker for Linux
+
 # To make things clear:
 
 1. THIS WILL NOT GET YOU VAC-BANNED! (only blocks server IPs)

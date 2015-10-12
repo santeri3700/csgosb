@@ -195,7 +195,7 @@ function block {
 	    sudo iptables -D INPUT -s $ip_india -j DROP
             sudo iptables -D INPUT -s 180.149.41.0/24 -j DROP
             sudo iptables -D INPUT -s 116.202.224.146 -j DROP
-            echo "Russia unblocked! Pinging..."
+            echo "India unblocked! Pinging..."
             ping_india="$(ping -c $ping_count $ip_india | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
         fi
         sleep 1

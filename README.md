@@ -10,16 +10,15 @@
 
 # Prepare & Run:
 
-1. Make sure these following things are installed: bash, iptools, coreutils and dpkg-query.
+1. Make sure these following things are installed: bash, iptools and coreutils.
 2. Open a terminal, 'cd' to the directory where you have extracted the script 
-and type 'chmod +x ./csgosb' to give run access.
+and type 'chmod +x ./csgosb' to give it run access.
 3. Start the script by typing 'sudo ./csgosb' to the open terminal.
 
 # How to use:
 
-The script works as any normal command do in Linux.
-It has parameters.
-_manual.txt has more info!_
+The script works as any other basic command do in Linux.
+Read _manual.txt_ for more info!
 
 # Faq:
 

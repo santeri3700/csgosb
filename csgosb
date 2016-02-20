@@ -1,465 +1,196 @@
 #!/bin/bash
 # @author santeri3700 aka LuomuBanaani
+version=2.0
+servernumberinput=$2
 
-echo " "
-iptables_installed="$(dpkg-query -W -f='${Status}' iptables)"
-coreutils_installed="$(dpkg-query -W -f='${Status}' coreutils)"
-selection=
-selected_server=""
-ping_count=1
+printf "CSGOSB v$version by LuomuBanaani\n"
 
-ping_russia="NO RESP"
-ping_vienna="NO RESP"
-ping_luxembourg="NO RESP"
-ping_singapore="NO RESP"
-ping_india="NO RESP"
-ping_dubai="NO RESP"
-ping_sydney="NO RESP"
-ping_africa="NO RESP"
-ping_brazil="NO RESP"
-ping_atlanta="NO RESP"
-ping_california="NO RESP"
-ping_seattle="NO RESP"
-ping_sterling="NO RESP"
+if [ "$EUID" -ne 0 ]
+  then echo "Note: (un)blocking server(s) require superuser access."
+fi
 
-ip_russia=sto.valve.net
-ip_vienna=vie.valve.net
-ip_luxembourg=lux.valve.net
-ip_singapore=sgp-1.valve.net
-ip_india=116.202.224.146
-ip_dubai=dxb.valve.net
-ip_sydney=syd.valve.net
-ip_africa=197.80.4.37
-ip_brazil=gru.valve.net
-ip_atlanta=162.254.199.1
-ip_california=162.254.194.1
-ip_seattle=192.69.96.1
-ip_sterling=208.78.164.1
+source ipvars
 
-function menu {
-    clear
-    echo "Choose server to block/unblock"
-    echo "------------------------------"
-    printf "1)  Russia     | Ping: "; printf "$ping_russia\n"
-    printf "2)  Vienna     | Ping: "; printf "$ping_vienna\n"
-    printf "3)  Luxembourg | Ping: "; printf "$ping_luxembourg\n"
-    printf "4)  Singapore  | Ping: "; printf "$ping_singapore\n"
-    printf "5)  India      | Ping: "; printf "$ping_india\n"
-    printf "6)  Dubai      | Ping: "; printf "$ping_dubai\n"
-    printf "7)  Sydney     | Ping: "; printf "$ping_sydney\n"
-    printf "8)  Africa     | Ping: "; printf "$ping_africa\n"
-    printf "9)  Brazil     | Ping: "; printf "$ping_brazil\n"
-    printf "10) Atlanta    | Ping: "; printf "$ping_atlanta\n"
-    printf "11) California | Ping: "; printf "$ping_california\n"
-    printf "12) Seattle    | Ping: "; printf "$ping_seattle\n"
-    printf "13) Sterling   | Ping: "; printf "$ping_sterling\n"
-    echo " -----------------------------"
-    echo "exit or ctrl+c to exit"
-    printf "): "
-    read selection
-    case $selection in
-       1) selected_server="Russia"; block;;
-       2) selected_server="Vienna"; block;;
-       3) selected_server="Luxembourg"; block;;
-       4) selected_server="Singapore"; block;;
-       5) selected_server="India"; block;;
-       6) selected_server="Dubai"; block;;
-       7) selected_server="Sydney"; block;;
-       8) selected_server="Africa"; block;;
-       9) selected_server="Brazil"; block;;
-       10) selected_server="Atlanta"; block;;
-       11) selected_server="California"; block;;
-       12) selected_server="Seattle"; block;;
-       13) selected_server="Sterling"; block;;
-       1337) echo "Wow, You are ElItE mY fRiEnD!"; sleep 2; menu;; #You better try it out! ;)
-       exit) exit 1;;
-       *) echo "Invalid server number! Please try again."; sleep 1; menu;;
-esac
+read -a eu_north_sep <<< "${eu_north}"
+read -a eu_east_sep <<< "${eu_east}"
+read -a eu_west_sep <<< "${eu_west}"
+read -a eu_poland_sep <<< "${eu_poland}"
+read -a us_east_sep <<< "${us_east}"
+read -a us_southeast_sep <<< "${us_southeast}"
+read -a us_west_sep <<< "${us_west}"
+read -a us_southwest_sep <<< "${us_southwest}"
+read -a us_south_sep <<< "${us_south}"
+read -a mid_east_sep <<< "${mid_east}"
+read -a asia_southeast_sep <<< "${asia_southeast}"
+read -a afri_south_sep <<< "${afri_south}"
+read -a australia_sep <<< "${australia}"
+read -a india_sep <<< "${india}"
+read -a japan_sep <<< "${japan}"
+read -a singa_sep <<< "${singa}"
+read -a hk_sep <<< "${hk}"
+
+function blockrange {
+    for i in "$@"; do
+      sudo iptables -A INPUT -s $i -j DROP && printf "Blocked IP: $i\n"
+    done
+    printf "IP's blocked!\n"
+}
+
+function unblockrange {
+    for i in "$@"; do
+      sudo iptables -C INPUT -s $i -j DROP &> /dev/null #Check if UNblocked -> 0 == blocked
+      while [ $? == 0 ]; do
+          sudo iptables -D INPUT -s $i -j DROP &> /dev/null
+          printf "Unblocked IP: $i\n";
+          sudo iptables -C INPUT -s $i -j DROP &> /dev/null
+      done
+    done
+    printf "IP's unblocked!\n"
 }
 
 function block {
-    if [ "$selected_server" == "Russia" ]; then
-        echo "[B]lock / [Un]block Russia? (Any other key to cancel)"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block russia
-            sudo iptables -A INPUT -s $ip_russia -j DROP
-            sudo iptables -A INPUT -s 146.66.156.0/24 -j DROP
-            sudo iptables -A INPUT -s 146.66.157.0/24 -j DROP
-            sudo iptables -A INPUT -s 185.25.180.0/24 -j DROP
-	    sudo iptables -A INPUT -s 185.25.181.0/24 -j DROP
-            echo "Russia blocked!"
-            ping_russia=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock russia
-	    sudo iptables -D INPUT -s $ip_russia -j DROP
-            sudo iptables -D INPUT -s 146.66.156.0/24 -j DROP
-            sudo iptables -D INPUT -s 146.66.157.0/24 -j DROP
-            sudo iptables -D INPUT -s 185.25.180.0/24 -j DROP
-	    sudo iptables -D INPUT -s 185.25.181.0/24 -j DROP
-            echo "Russia unblocked! Pinging..."
-            ping_russia="$(ping -c $ping_count $ip_russia | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Vienna" ]; then
-        echo "[B]lock / [U]nblock Vienna?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block vienna
-            sudo iptables -A INPUT -s $ip_vienna -j DROP
-            sudo iptables -A INPUT -s 146.66.155.0/24 -j DROP
-            sudo iptables -A INPUT -s 185.25.182.0/24 -j DROP
-            echo "Vienna blocked!"
-            ping_vienna=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock vienna
-	    sudo iptables -D INPUT -s $ip_vienna -j DROP
-            sudo iptables -D INPUT -s 146.66.155.0/24 -j DROP
-            sudo iptables -D INPUT -s 185.25.182.0/24 -j DROP
-            echo "Vienna unblocked! Pinging..."
-            ping_vienna="$(ping -c $ping_count $ip_vienna | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Luxembourg" ]; then
-        echo "[B]lock / [U]nblock Luxembourg?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block luxembourg
-            sudo iptables -A INPUT -s $ip_luxembourg -j DROP
-            sudo iptables -A INPUT -s 146.66.152.0/24 -j DROP
-            sudo iptables -A INPUT -s 146.66.158.0/24 -j DROP
-            sudo iptables -A INPUT -s 146.66.159.0/24 -j DROP
-            echo "Luxembourg blocked!"
-            ping_luxembourg=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock luxembourg
-	    sudo iptables -D INPUT -s $ip_luxembourg -j DROP
-            sudo iptables -D INPUT -s 146.66.152.0/24 -j DROP
-            sudo iptables -D INPUT -s 146.66.158.0/24 -j DROP
-            sudo iptables -D INPUT -s 146.66.159.0/24 -j DROP
-            echo "Luxembourg unblocked! Pinging..."
-            ping_luxembourg="$(ping -c $ping_count $ip_luxembourg | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Singapore" ]; then
-        echo "[B]lock / [U]nblock Singapore?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block singapore
-            sudo iptables -A INPUT -s $ip_singapore -j DROP
-            sudo iptables -A INPUT -s 103.28.54.0/24 -j DROP
-            sudo iptables -A INPUT -s 103.28.55.0/24 -j DROP
-            sudo iptables -A INPUT -s 103.10.124.0/24 -j DROP
-            echo "Singapore blocked!"
-            ping_singapore=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock singapore
-	    sudo iptables -D INPUT -s $ip_singapore -j DROP
-            sudo iptables -D INPUT -s 103.28.54.0/24 -j DROP
-            sudo iptables -D INPUT -s 103.28.55.0/24 -j DROP
-            sudo iptables -D INPUT -s 103.10.124.0/24 -j DROP
-            echo "Singapore unblocked! Pinging..."
-            ping_singapore="$(ping -c $ping_count $ip_singapore | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "India" ]; then
-        echo "[B]lock / [U]nblock India?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block india
-            sudo iptables -A INPUT -s $ip_india -j DROP
-            sudo iptables -A INPUT -s 180.149.41.0/24 -j DROP
-            sudo iptables -A INPUT -s 116.202.224.146 -j DROP
-            echo "India blocked!"
-            ping_india=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock india
-	    sudo iptables -D INPUT -s $ip_india -j DROP
-            sudo iptables -D INPUT -s 180.149.41.0/24 -j DROP
-            sudo iptables -D INPUT -s 116.202.224.146 -j DROP
-            echo "India unblocked! Pinging..."
-            ping_india="$(ping -c $ping_count $ip_india | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Dubai" ]; then
-        echo "[B]lock / [U]nblock Dubai?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block dubai
-            sudo iptables -A INPUT -s $ip_dubai -j DROP
-            sudo iptables -A INPUT -s 185.25.183.0/24 -j DROP
-            echo "Dubai blocked!"
-            ping_dubai=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock dubai
-	    sudo iptables -D INPUT -s $ip_dubai -j DROP
-            sudo iptables -D INPUT -s 185.25.183.0/24 -j DROP
-            echo "Dubai unblocked! Pinging..."
-            ping_dubai="$(ping -c $ping_count $ip_dubai | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Sydney" ]; then
-        echo "[B]lock / [U]nblock Sydney?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block sydney
-            sudo iptables -A INPUT -s $ip_sydney -j DROP
-            sudo iptables -A INPUT -s 103.10.125.0/24 -j DROP
-            echo "Sydney blocked!"
-            ping_sydney=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock sydney
-	    sudo iptables -D INPUT -s $ip_sydney -j DROP
-            sudo iptables -D INPUT -s 103.10.125.0/24 -j DROP
-            echo "Sydney unblocked! Pinging..."
-            ping_sydney="$(ping -c $ping_count $ip_sydney | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Africa" ]; then
-        echo "[B]lock / [U]nblock Africa?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block africa
-            sudo iptables -A INPUT -s $ip_africa -j DROP
-            sudo iptables -A INPUT -s 197.80.4.37 -j DROP
-            sudo iptables -A INPUT -s 152.111.192.0/24 -j DROP
-            sudo iptables -A INPUT -s 197.80.200.0/24 -j DROP
-	    sudo iptables -A INPUT -s 196.38.180.0/24 -j DROP
-            echo "Africa blocked!"
-            ping_africa=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock africa
-	    sudo iptables -D INPUT -s $ip_africa -j DROP
-            sudo iptables -D INPUT -s 197.80.4.37 -j DROP
-            sudo iptables -D INPUT -s 152.111.192.0/24 -j DROP
-            sudo iptables -D INPUT -s 197.80.200.0/24 -j DROP
-	    sudo iptables -D INPUT -s 196.38.180.0/24 -j DROP
-            echo "Africa unblocked! Pinging..."
-            ping_africa="$(ping -c $ping_count $ip_africa | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Brazil" ]; then
-        echo "[B]lock / [U]nblock Brazil?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block brazil
-            sudo iptables -A INPUT -s $ip_brazil -j DROP
-            sudo iptables -A INPUT -s 209.197.29.0/24 -j DROP
-            sudo iptables -A INPUT -s 209.197.25.0/24 -j DROP
-            sudo iptables -A INPUT -s 205.185.194.0/24 -j DROP
-            echo "Brazil blocked!"
-            ping_brazil=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock brazil
-	    sudo iptables -D INPUT -s $ip_brazil -j DROP
-            sudo iptables -D INPUT -s 209.197.29.0/24 -j DROP
-            sudo iptables -D INPUT -s 209.197.25.0/24 -j DROP
-            sudo iptables -D INPUT -s 205.185.194.0/24 -j DROP
-            echo "Brazil unblocked! Pinging..."
-            ping_brazil="$(ping -c $ping_count $ip_brazil | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Atlanta" ]; then
-        echo "[B]lock / [U]nblock Atlanta?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block atlanta
-            sudo iptables -A INPUT -s $ip_atlanta -j DROP
-            sudo iptables -A INPUT -s 162.254.199.0/24 -j DROP
-            echo "Atlanta blocked!"
-            ping_atlanta=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock atlanta
-	    sudo iptables -D INPUT -s $ip_atlanta -j DROP
-            sudo iptables -D INPUT -s 162.254.199.0/24 -j DROP
-            echo "Atlanta unblocked! Pinging..."
-            ping_atlanta="$(ping -c $ping_count $ip_atlanta | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "California" ]; then
-        echo "[B]lock / [U]nblock California?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block california
-            sudo iptables -A INPUT -s $ip_california -j DROP
-            sudo iptables -A INPUT -s 162.254.194.0/24 -j DROP
-            echo "California blocked!"
-            ping_california=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock california
-	    sudo iptables -D INPUT -s $ip_california -j DROP
-            sudo iptables -D INPUT -s 162.254.194.0/24 -j DROP
-            echo "California unblocked! Pinging..."
-            ping_california="$(ping -c $ping_count $ip_california | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Seattle" ]; then
-        echo "[B]lock / [U]nblock Seattle?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block seattle
-            sudo iptables -A INPUT -s $ip_seattle -j DROP
-            sudo iptables -A INPUT -s 192.69.96.0/24 -j DROP
-            sudo iptables -A INPUT -s 192.69.97.0/24 -j DROP
-            echo "Seattle blocked!"
-            ping_seattle=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock seattle
-	    sudo iptables -D INPUT -s $ip_seattle -j DROP
-            sudo iptables -D INPUT -s 192.69.96.0/24 -j DROP
-            sudo iptables -D INPUT -s 192.69.97.0/24 -j DROP
-            echo "Seattle unblocked! Pinging..."
-            ping_seattle="$(ping -c $ping_count $ip_seattle | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "Sterling" ]; then
-        echo "[B]lock / [U]nblock Sterling?"
-        printf "): "
-        read blockanswer
-        if [ ${blockanswer:0:1} == "B" ] || [ ${blockanswer:0:1} == "b" ]; then
-            # block sterling
-            sudo iptables -A INPUT -s $ip_sterling -j DROP
-            sudo iptables -A INPUT -s 208.78.164.0/24 -j DROP
-            sudo iptables -A INPUT -s 208.78.165.0/24 -j DROP
-            sudo iptables -A INPUT -s 208.78.166.0/24 -j DROP
-            echo "Sterling blocked!"
-            ping_sterling=Blocked
-        fi
-        if [ ${blockanswer:0:1} == "U" ] || [ ${blockanswer:0:1} == "u" ]; then
-            # unblock sterling
-	    sudo iptables -D INPUT -s $ip_sterling -j DROP
-            sudo iptables -D INPUT -s 208.78.164.0/24 -j DROP
-            sudo iptables -D INPUT -s 208.78.165.0/24 -j DROP
-            sudo iptables -D INPUT -s 208.78.166.0/24 -j DROP
-            echo "Sterling unblocked! Pinging..."
-            ping_sterling="$(ping -c $ping_count $ip_sterling | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "PINGED!"
-        fi
-        sleep 1
-        menu
-    fi
-    if [ "$selected_server" == "" ]; then
-        echo "ERROR: selected_server is NULL!"
-        echo "Exiting..."
-        exit 1
+    case $servernumberinput in
+        1) blockrange ${eu_north_sep[@]};;
+        2) blockrange ${eu_east_sep[@]};;
+        3) blockrange ${eu_west_sep[@]};;
+        4) blockrange ${eu_poland_sep[@]};;
+        5) blockrange ${us_east_sep[@]};;
+        6) blockrange ${us_southeast_sep[@]};;
+        7) blockrange ${us_west_sep[@]};;
+        8) blockrange ${us_southwest_sep[@]};;
+        9) blockrange ${us_south_sep[@]};;
+        10) blockrange ${mid_east_sep[@]};;
+        11) blockrange ${asia_southeast_sep[@]};;
+        12) blockrange ${afri_south_sep[@]};;
+        13) blockrange ${australia_sep[@]};;
+        14) blockrange ${india_sep[@]};;
+        15) blockrange ${japan_sep[@]};;
+        16) blockrange ${singa_sep[@]};;
+        17) blockrange ${hk_sep[@]};;
+        all) blockrange ${eu_north_sep[@]};
+             blockrange ${eu_east_sep[@]};
+             blockrange ${eu_west_sep[@]};
+             blockrange ${eu_poland_sep[@]};
+             blockrange ${us_east_sep[@]};
+             blockrange ${us_southeast_sep[@]};
+             blockrange ${us_west_sep[@]};
+             blockrange ${us_southwest_sep[@]};
+             blockrange ${us_south_sep[@]};
+             blockrange ${mid_east_sep[@]};
+             blockrange ${asia_southeast_sep[@]};
+             blockrange ${afri_south_sep[@]};
+             blockrange ${australia_sep[@]};
+             blockrange ${india_sep[@]};
+             blockrange ${japan_sep[@]};
+             blockrange ${singa_sep[@]};
+             blockrange ${hk_sep[@]};;
+        1337) printf "Wow, such 'leet'.\n";;
+        *) printf "Invalid server number! ($servernumberinput)\n";;
+    esac
+}
+
+function unblock {
+    case $servernumberinput in
+        1) unblockrange ${eu_north_sep[@]};;
+        2) unblockrange ${eu_east_sep[@]};;
+        3) unblockrange ${eu_west_sep[@]};;
+        4) unblockrange ${eu_poland_sep[@]};;
+        5) unblockrange ${us_east_sep[@]};;
+        6) unblockrange ${us_southeast_sep[@]};;
+        7) unblockrange ${us_west_sep[@]};;
+        8) unblockrange ${us_southwest_sep[@]};;
+        9) unblockrange ${us_south_sep[@]};;
+        10) unblockrange ${mid_east_sep[@]};;
+        11) unblockrange ${asia_southeast_sep[@]};;
+        12) unblockrange ${afri_south_sep[@]};;
+        13) unblockrange ${australia_sep[@]};;
+        14) unblockrange ${india_sep[@]};;
+        15) unblockrange ${japan_sep[@]};;
+        16) unblockrange ${singa_sep[@]};;
+        17) unblockrange ${hk_sep[@]};;
+        all) unblockrange ${eu_north_sep[@]};
+             unblockrange ${eu_east_sep[@]};
+             unblockrange ${eu_west_sep[@]};
+             unblockrange ${eu_poland_sep[@]};
+             unblockrange ${us_east_sep[@]};
+             unblockrange ${us_southeast_sep[@]};
+             unblockrange ${us_west_sep[@]};
+             unblockrange ${us_southwest_sep[@]};
+             unblockrange ${us_south_sep[@]};
+             unblockrange ${mid_east_sep[@]};
+             unblockrange ${asia_southeast_sep[@]};
+             unblockrange ${afri_south_sep[@]};
+             unblockrange ${australia_sep[@]};
+             unblockrange ${india_sep[@]};
+             unblockrange ${japan_sep[@]};
+             unblockrange ${singa_sep[@]};
+             unblockrange ${hk_sep[@]};;
+        *) printf "Invalid server number! ($servernumberinput)\n";;
+    esac
+}
+
+function getping {
+    pingnum=$(ping -i 0.2 -c 3 -s 16 ${1} | tail -1| awk '{print $4}' | cut -d '/' -f 2;)
+    if [ -z $pingnum ]; then
+        printf "Blocked / Offline\n"
+    else
+        printf "$pingnum - ms\n"
     fi
 }
 
-if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root!" 1>&2
-   exit 1
-fi
-
-echo "CS:GO Server Blocker for Linux!"
-echo "Version: 1.0   By: santeri3700 "
-echo "               aka LuomuBanaani"
-echo "-------------------------------"
-sleep 0.3
-printf "Checking required tools"
-sleep 0.2
-printf "."
-sleep 0.2
-printf "."
-sleep 0.2
-printf ".\n"
-if [ "$iptables_installed" == "install ok installed" ]; then
-    echo "iptables PASS! :)"
-else {
-    echo "Error! Please install iptables"
+function pingserver {
+    printf "Pinging server(s)\n"
+    case $servernumberinput in
+        1) printf "Server 1: "; getping $main_eu_north;;
+        2) printf "Server 2: "; getping $main_eu_east;;
+        3) printf "Server 3: "; getping $main_eu_west;;
+        4) printf "Server 4: "; getping $main_eu_poland;;
+        5) printf "Server 5: "; getping $main_us_east;;
+        6) printf "Server 6: "; getping $main_us_southeast;;
+        7) printf "Server 7: "; getping $main_us_west;;
+        8) printf "Server 8: "; getping $main_us_southwest;;
+        9) printf "Server 9: "; getping $main_us_south;;
+        10) printf "Server 10: "; getping $main_mid_east;;
+        11) printf "Server 11: "; getping $main_asia_southeast;;
+        12) printf "Server 12: "; getping $main_afri_south;;
+        13) printf "Server 13: "; getping $main_australia;;
+        14) printf "Server 14: "; getping $main_india;;
+        15) printf "Server 15: "; getping $main_japan;;
+        16) printf "Server 16: "; getping $main_singa;;
+        17) printf "Server 17: "; getping $main_hk;;
+        all) printf "Server 1: "; getping $main_eu_north;
+             printf "Server 2: "; getping $main_eu_east;
+             printf "Server 3: "; getping $main_eu_west;
+             printf "Server 4: "; getping $main_eu_poland;
+             printf "Server 5: "; getping $main_us_east;
+             printf "Server 6: "; getping $main_us_southeast;
+             printf "Server 7: "; getping $main_us_west;
+             printf "Server 8: "; getping $main_us_southwest;
+             printf "Server 9: "; getping $main_us_south;
+             printf "Server 10: "; getping $main_mid_east;
+             printf "Server 11: "; getping $main_asia_southeast;
+             printf "Server 12: "; getping $main_afri_south;
+             printf "Server 13: "; getping $main_australia;
+             printf "Server 14: "; getping $main_india;
+             printf "Server 15: "; getping $main_japan;
+             printf "Server 16: "; getping $main_singa;
+             printf "Server 17: "; getping $main_hk;;
+        *) printf "Invalid server number! ($servernumberinput)\n";;
+    esac
 }
-fi
-if [ "$coreutils_installed" == "install ok installed" ]; then
-    echo "coreutils PASS! :)"
-else {
-    echo "Error! Please install coreutils"
-    exit 1
-}
-fi
 
-sleep 0.3
-echo "Do you want to scan pings? [Y]es / [N]o (Takes some time)"
-read answer
-if [ ${answer:0:1} == "Y" ] || [ ${answer:0:1} == "y" ]; then
-
-    echo "Checking server pings...    (Ctrl+C to exit)"
-    ping_russia="$(ping -c $ping_count $ip_russia | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "1/14"
-    ping_vienna="$(ping -c $ping_count $ip_vienna | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "2/14"
-    ping_luxembourg="$(ping -c $ping_count $ip_luxembourg | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "3/14"
-    ping_singapore="$(ping -c $ping_count $ip_singapore | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "5/14"
-    ping_india="$(ping -c $ping_count $ip_india | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "6/14"
-    ping_dubai="$(ping -c $ping_count $ip_dubai | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "7/14"
-    ping_sydney="$(ping -c $ping_count $ip_sydney | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "8/14"
-    ping_africa="$(ping -c $ping_count $ip_africa | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "9/14"
-    ping_brazil="$(ping -c $ping_count $ip_brazil | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "10/14"
-    ping_atlanta="$(ping -c $ping_count $ip_atlanta | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "11/14"
-    ping_california="$(ping -c $ping_count $ip_california | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "12/14"
-    ping_seattle="$(ping -c $ping_count $ip_seattle | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "13/14"
-    ping_sterling="$(ping -c $ping_count $ip_sterling | tail -1| awk '{print $4}' | cut -d '/' -f 2)"; echo "14/14"
-    menu
-else {
-    ping_russia="No scan"
-    ping_vienna="No scan"
-    ping_luxembourg="No scan"
-    ping_singapore="No scan"
-    ping_india="No scan"
-    ping_dubai="No scan"
-    ping_sydney="No scan"
-    ping_africa="No scan"
-    ping_brazil="No scan"
-    ping_atlanta="No scan"
-    ping_california="No scan"
-    ping_seattle="No scan"
-    ping_sterling="No scan"
-    echo "Skipping.."
-    sleep 1
-    menu
-}
-fi
-sleep 0.2
+case "$1" in
+    -b) block;;
+    -block) unblock;;
+    --block) block;;
+    -u) unblock;;
+    -unblock) unblock;;
+    --unblock) unblock;;
+    -l) cat serverlist.txt;;
+    -list) cat serverlist.txt;;
+    --list) cat serverlist.txt;;
+    -p) pingserver;;
+    -ping) pingserver;;
+    --ping) pingserver;;
+    *) cat manual.txt;;
+esac

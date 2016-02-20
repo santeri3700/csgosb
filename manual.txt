@@ -1,0 +1,19 @@
+Usage: csgosb [OPTION] [SERVER NUMBER/all]
+-l, --list     		    Prints the server list
+-b, --block     	    Block a server
+-u, --unblock               Unblocks a server
+
+Ex. Print the server list
+./csgosb -l
+
+Ex. Block and unblock "EU North"
+./csgosb -b 1
+./csgosb -u 1
+
+Ex. Block all and unblock all
+./csgosb -b all
+./csgosb -u all
+
+Ex. Ping "Poland" and ping all
+./csgosb -p 4
+./csgosb -p all

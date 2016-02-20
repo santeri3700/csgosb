@@ -17,9 +17,9 @@ and type 'chmod +x ./csgosb' to give run access.
 
 # How to use:
 
-1. Answer to the questions by typing the answer and pressing enter.
-2. Servers are numbered. Type server's number and press enter.
-3. Type your answer and press enter.
+The script works as any normal command do in Linux.
+It has parameters.
+_manual.txt has more info!_
 
 # Faq:
 
@@ -33,12 +33,11 @@ Q: Why does this script need root access?<br>
 A: iptables won't work without root access. This script won't edit other files.
 
 Q: Why can't I see server's ping after unblocking it?<br>
-A: You've probably blocked it multiple times. Try to unblock it again.
+A: The server may be offline or your ISP has blocked it.
 
 Q: Am I allowed to modify and publish my version of this script?<br>
 A: Yes, but please tell me about it so I can fix my version of the script.
 
-This is not the finest code you have seen, but atleast it does it's job.
 Give me suggestions and if you find bugs or missing servers from this script, please report them to me.
 
 -santeri3700 aka LuomuBanaani

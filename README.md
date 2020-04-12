@@ -32,16 +32,16 @@ and then run 'chmod +x ./csgosb.py' to give it run access.
 
 # FAQ
 
-Q: Why am I getting connected to a region I have blocked?
+Q: Why am I getting connected to a region I have blocked?<br>
 A: Sometimes CS:GO routes your connection via a *Steam Datagram Relay* to another server in another region. As of now, there is no way around it that I know of.
 
-Q: How to fix "Failed to connect the match."?
+Q: How to fix "Failed to connect the match."?<br>
 A: Restart CS:GO and set your max ping to 350ms (`mm_dedicated_search_maxping 350`)
 
-Q: I'm in a lobby and stuck at "*Confirming match...*"
+Q: I'm in a lobby and stuck at "*Confirming match...*"<br>
 A: Make sure the lobby leader has blocked the same servers as you.
 
-Q: Am I allowed to modify and publish my own version of this script?
+Q: Am I allowed to modify and publish my own version of this script?<br>
 A: Yes, see [LICENSE.md](https://github.com/santeri3700/csgosb/blob/master/LICENSE.md).
 
 # Plans and work in progress before version 1.0.0

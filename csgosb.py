@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+__author__ = "santeri3700"
+__copyright__ = "Copyright 2020, santeri3700"
+__license__ = "GPLv2"
+__version__ = "0.0.1"
+
 import platform
 import iptc
 import ipaddress
@@ -17,7 +23,6 @@ from gi.repository import GLib, Gtk, GObject
 class CSGOSB():
 
     app_name = "CSGOSB"
-    app_version = "0.0.1"
     debug = True # Enable/Disable debug messages and tests.
 
     def __init__(self):
@@ -350,7 +355,7 @@ class GUI(CSGOSB):
             main.gui.liststore[row][3] = "Timed out!"
 
     def __init__(self):
-        window = Gtk.Window(title=self.app_name + " version " + self.app_version)
+        window = Gtk.Window(title=self.app_name + " version " + __version__)
         window.__init__(self)
         window.set_border_width(4)
         window.set_default_size(400, 200)
